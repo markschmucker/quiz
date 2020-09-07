@@ -1,0 +1,104 @@
+"""
+A flask server to handle webhooks from Typeform. This is similar to the general
+forms webhook which adds users to a group if they self-certify. I've made a copy
+for this application because it's a little different- for example it might be
+different to determine whether they've passed the test, and it will take a
+different action- unlock their trust level and add them to the passed_quiz group.
+"""
+
+from flask import Flask, render_template, flash, request
+import logging
+from pprint import pprint
+from client506 import create_client
+from ses import send_simple_email
+from pydiscourse.exceptions import (
+    DiscourseClientError
+)
+
+recipients = ['markschmucker@yahoo.com',]
+
+logger = logging.getLogger('quiz_webhook')
+file_handler = logging.FileHandler('quiz_webhook.log')
+file_handler.setLevel(logging.INFO)
+logger.addHandler(file_handler)
+
+logger.info('running quiz web hook server.py')
+
+app = Flask(__name__)
+app.config.from_object(__name__)
+app.config['SECRET_KEY'] = '7d441f27d441f27567d4jjf2b6176a'
+
+
+def dict_factory(cursor, row):
+    d = {}
+    for idx, col in enumerate(cursor.description):
+        d[col[0]] = row[idx]
+    return d
+
+
+class RequestHandler:
+    def __init__(self, data):
+        self.client = create_client(1)
+        self.data = data
+        self.answers = self.data['form_response']['answers']
+        self.username = self.data['form_response']['hidden']['username']
+        self.user = self.client.user(self.username)
+        pprint(self.data)
+
+    def user_is_in_group(self, group_name, username):
+        members = self.client.members_of_group(group_name)
+        membernames = [x['username'] for x in members]
+        return username in membernames
+
+    def add_to_group(self, group_name, username):
+        group = self.client.my_group(group_name)
+        self.client.add_group_members(group['id'], [username, ])
+
+    def process(self):
+        # this might need to be more complicated?
+        passed = self.answers[0]['boolean']
+        if passed:
+            # group_name = self.group_name
+
+            # Unlock them from TL0. Discourse will recognize this soon and will promote them to TL1.
+            # See https://meta.discourse.org/t/understanding-discourse-trust-levels/90752/61
+            self.client.trust_level_lock(self.user['id'], False)
+
+            group_name = 'passed_quiz'
+            try:
+                self.add_to_group(group_name, self.username)
+                subject = 'User was added to %s' % group_name
+                s = '%s was added to the group %s because they passed the quiz.' % (self.username, group_name)
+            except DiscourseClientError, exc:
+                subject = 'User could not be added to %s' % group_name
+                s = '%s could not be added to the group %s. Maybe they are already a member?' % (self.username, group_name)
+
+            s += '<br>'
+            url = 'https://forum.506investorgroup.com/g/%s' % group_name
+            s += 'To change this, visit the %s group settings at ' % group_name
+            s += url
+            s += '.'
+            for recipient in recipients:
+                send_simple_email(recipient, subject, s)
+                print 'sent email'
+
+
+# groupname must be the name, not "full name", of the group.
+
+@app.route('/<groupname>', methods=['GET', 'POST'])
+def handler(groupname):
+    if request.method == 'POST':
+        print 'got request to join group: ', groupname
+        data = request.json
+        q = RequestHandler(data)
+        q.group_name = groupname
+        q.process()
+        return '', 200
+    else:
+        return '', 400
+
+
+if __name__ == "__main__":
+    # Digests use 8081, forms use 8082, tracking_pixel and resourse server use 8083,
+    # not sure if either of those two on 8083 are running; run this on 8084 (it's open).
+    app.run(host="0.0.0.0", port=8084, debug=True, threaded=True)
