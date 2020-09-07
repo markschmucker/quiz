@@ -56,8 +56,13 @@ class RequestHandler:
 
     def process(self):
         # this might need to be more complicated?
+
+        pprint(self.answers)
+
         passed = self.answers[0]['boolean']
+
         if passed:
+
             # group_name = self.group_name
 
             # Unlock them from TL0. Discourse will recognize this soon and will promote them to TL1.
