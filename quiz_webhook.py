@@ -41,6 +41,7 @@ class RequestHandler:
         self.client = create_client(1)
         self.data = data
         self.answers = self.data['form_response']['answers']
+        self.score = self.data['form_response']['calculated']['score']
         self.username = self.data['form_response']['hidden']['username']
         self.user = self.client.user(self.username)
         pprint(self.data)
@@ -59,7 +60,8 @@ class RequestHandler:
 
         pprint(self.answers)
 
-        passed = self.answers[0]['boolean']
+        passed = self.score == 5
+        # or just the fact that we're here is enough if we keep circle-back logic
 
         if passed:
 
@@ -93,8 +95,9 @@ class RequestHandler:
 @app.route('/<groupname>', methods=['GET', 'POST'])
 def handler(groupname):
     if request.method == 'POST':
-        print 'got request to join group: ', groupname
+        print 'got request, either a new user or quiz completion: '
         data = request.json
+        pprint(data)
         q = RequestHandler(data)
         q.group_name = groupname
         q.process()
