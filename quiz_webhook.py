@@ -8,7 +8,7 @@ different action- unlock their trust level and add them to the passed_quiz group
 
 from flask import Flask, render_template, flash, request
 import logging
-from pprint import pprint
+from pprint import pprint, pformat
 from client506 import create_client
 from ses import send_simple_email
 from pydiscourse.exceptions import (
@@ -111,7 +111,8 @@ def user_event_handler():
     print 'got user event'
     data = request.json
     pprint(data)
-    send_simple_email('markschmucker@yahoo.com', 'User Event', str(data))
+    report_str = pformat(data)
+    send_simple_email('markschmucker@yahoo.com', 'User Event', report_str)
     ##q = RequestHandler(data)
     ##q.group_name = groupname
     ##q.process()
