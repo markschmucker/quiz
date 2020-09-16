@@ -98,9 +98,10 @@ def handler(groupname):
         print 'got request, either a new user or quiz completion: '
         data = request.json
         pprint(data)
-        q = RequestHandler(data)
-        q.group_name = groupname
-        q.process()
+        send_simple_email('markschmucker@yahoo.com', 'New User or Quiz Completed', str(data))
+        ##q = RequestHandler(data)
+        ##q.group_name = groupname
+        ##q.process()
         return '', 200
     else:
         return '', 400
