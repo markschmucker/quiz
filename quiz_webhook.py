@@ -108,7 +108,7 @@ def handler(groupname):
 
 
 @app.route('/user_event', methods=['GET', 'POST'])
-def handler():
+def user_event_handler():
     if request.method == 'POST':
         print 'got user event'
         data = request.json
