@@ -92,7 +92,7 @@ class RequestHandler:
 
 # groupname must be the name, not "full name", of the group.
 # this needs to be changed to handle quiz
-@app.route('/<groupname>', methods=['GET', 'POST'])
+@app.route('/quiz', methods=['GET', 'POST'])
 def handler(groupname):
     if request.method == 'POST':
         print 'got request, either a new user or quiz completion: '
@@ -106,8 +106,7 @@ def handler(groupname):
     else:
         return '', 400
 
-
-@app.route('/user_event', methods=['GET', 'POST'])
+@app.route('/user_event', methods=['POST'])
 def user_event_handler():
     print 'got user event'
     data = request.json
