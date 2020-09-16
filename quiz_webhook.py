@@ -109,17 +109,14 @@ def handler(groupname):
 
 @app.route('/user_event', methods=['GET', 'POST'])
 def user_event_handler():
-    if request.method == 'POST':
-        print 'got user event'
-        data = request.json
-        pprint(data)
-        send_simple_email('markschmucker@yahoo.com', 'User Event', str(data))
-        ##q = RequestHandler(data)
-        ##q.group_name = groupname
-        ##q.process()
-        return '', 200
-    else:
-        return '', 400
+    print 'got user event'
+    data = request.json
+    pprint(data)
+    send_simple_email('markschmucker@yahoo.com', 'User Event', str(data))
+    ##q = RequestHandler(data)
+    ##q.group_name = groupname
+    ##q.process()
+    return '', 200
 
 
 if __name__ == "__main__":
