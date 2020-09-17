@@ -85,7 +85,14 @@ class RequestHandler:
 
 @app.route('/quiz_complete', methods=['POST'])
 def quiz_complete_handler():
-
+    if request.method == 'POST':
+        print 'quiz is complete: ', groupname
+        data = request.json
+        q = RequestHandler(data)
+        q.process()
+        return '', 200
+    else:
+        return '', 400
 
 @app.route('/user_event', methods=['POST'])
 def user_event_handler():
