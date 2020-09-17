@@ -86,7 +86,7 @@ class RequestHandler:
 @app.route('/quiz_complete', methods=['POST'])
 def quiz_complete_handler():
     if request.method == 'POST':
-        print 'quiz is complete: ', groupname
+        print 'quiz is complete: '
         data = request.json
         q = RequestHandler(data)
         q.process()
