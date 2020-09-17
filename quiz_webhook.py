@@ -57,17 +57,9 @@ class RequestHandler:
         self.client.add_group_members(group['id'], [username, ])
 
     def process(self):
-        # this might need to be more complicated?
-
-        pprint(self.answers)
-
-        passed = self.score == 5
-        # or just the fact that we're here is enough if we keep circle-back logic
-
+        # just the fact that we're here is enough if we keep circle-back logic
+        passed = True
         if passed:
-
-            # group_name = self.group_name
-
             # Unlock them from TL0. Discourse will recognize this soon and will promote them to TL1.
             # See https://meta.discourse.org/t/understanding-discourse-trust-levels/90752/61
             self.client.trust_level_lock(self.user['id'], False)
@@ -89,6 +81,10 @@ class RequestHandler:
             for recipient in recipients:
                 send_simple_email(recipient, subject, s)
                 print 'sent email'
+
+
+@app.route('/quiz_complete', methods=['POST'])
+def quiz_complete_handler():
 
 
 @app.route('/user_event', methods=['POST'])
