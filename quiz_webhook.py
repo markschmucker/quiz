@@ -8,6 +8,7 @@ different action- unlock their trust level and add them to the passed_quiz group
 
 from flask import Flask, render_template, flash, request
 import logging
+import json
 from pprint import pprint, pformat
 from client506 import create_client
 from ses import send_simple_email
@@ -90,33 +91,39 @@ class RequestHandler:
                 print 'sent email'
 
 
-# groupname must be the name, not "full name", of the group.
-# this needs to be changed to handle quiz
-@app.route('/quiz', methods=['GET', 'POST'])
-def handler(groupname):
-    if request.method == 'POST':
-        print 'got request, either a new user or quiz completion: '
-        data = request.json
-        pprint(data)
-        send_simple_email('markschmucker@yahoo.com', 'New User or Quiz Completed', str(data))
-        ##q = RequestHandler(data)
-        ##q.group_name = groupname
-        ##q.process()
-        return '', 200
-    else:
-        return '', 400
-
 @app.route('/user_event', methods=['POST'])
 def user_event_handler():
-    print 'got user event'
-    data = request.json
-    pprint(data)
-    report_str = pformat(data)
-    send_simple_email('markschmucker@yahoo.com', 'User Event', report_str)
-    ##q = RequestHandler(data)
-    ##q.group_name = groupname
-    ##q.process()
-    return '', 200
+
+    # Currently we're only interested in user_created. Other webhooks are available,
+    # for users, topics, and posts. (However not for user_added_to_group). See
+    # https://meta.discourse.org/t/setting-up-webhooks/49045.
+
+    headers = request.headers()
+    pprint(headers)
+
+    event = request.headers['X-Discourse-Event']
+    print 'event: ', event
+
+    if event == 'user_created':
+        print 'user was created'
+        data = request.json
+        pprint(data)
+        # need to convert to html, not this
+        # report_str = pformat(data)
+
+        send_simple_email('markschmucker@yahoo.com', 'User Created, raw data', request.json)
+
+        d = json.loads(request.json)
+        user_id = d['id']
+        email = d['email']
+        username = d['username']
+        msg = '%d %s %s' % (user_id, username, email)
+
+
+        send_simple_email('markschmucker@yahoo.com', 'User Created, interpreted', msg)
+        # Once I see an example and can get the user id, need to do this:
+        # self.client.trust_level_lock(self.user['id'], True)
+        return '', 200
 
 
 if __name__ == "__main__":
