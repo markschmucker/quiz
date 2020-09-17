@@ -101,7 +101,11 @@ def user_event_handler():
     # for users, topics, and posts. (However not for user_added_to_group). See
     # https://meta.discourse.org/t/setting-up-webhooks/49045.
 
-    headers = request.headers()
+
+    #friday: headers is not callable. and I got that error when john doe finished the quiz-
+    #that should have gone to quiz_complete_handler.
+
+    headers = request.headers
     pprint(headers)
 
     event = request.headers['X-Discourse-Event']
