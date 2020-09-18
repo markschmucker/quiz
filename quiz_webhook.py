@@ -125,6 +125,9 @@ def user_event_handler():
 
         send_simple_email('markschmucker@yahoo.com', 'User Created', 'no text yet...')
 
+        print 'type of request json is:'
+        print type(request.json)
+
         d = json.loads(request.json)
         user_id = d['id']
         email = d['email']
