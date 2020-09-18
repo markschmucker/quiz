@@ -123,7 +123,7 @@ def user_event_handler():
         # need to convert to html, not this
         # report_str = pformat(data)
 
-        send_simple_email('markschmucker@yahoo.com', 'User Created, raw data', request.json)
+        send_simple_email('markschmucker@yahoo.com', 'User Created')
 
         d = json.loads(request.json)
         user_id = d['id']
@@ -131,10 +131,12 @@ def user_event_handler():
         username = d['username']
         msg = '%d %s %s' % (user_id, username, email)
 
-
         send_simple_email('markschmucker@yahoo.com', 'User Created, interpreted', msg)
-        # Once I see an example and can get the user id, need to do this:
-        # self.client.trust_level_lock(self.user['id'], True)
+
+        client = create_client(1)
+        client.trust_level_lock(user_id, True)
+        send_simple_email('markschmucker@yahoo.com', 'User Locked', msg)
+
         return '', 200
     else:
         return '', 400
