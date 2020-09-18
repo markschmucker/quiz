@@ -120,21 +120,14 @@ def user_event_handler():
         print 'user was created'
         data = request.json
         pprint(data)
-        # need to convert to html, not this
-        # report_str = pformat(data)
 
         send_simple_email('markschmucker@yahoo.com', 'User Created', 'no text yet...')
 
-        # it's already a dict
-        # print 'type of request json is:'
-        # print type(request.json)
+        user = request.json['user']
 
-        # d = json.loads(request.json)
-        d = request.json
-
-        user_id = d['id']
-        email = d['email']
-        username = d['username']
+        user_id = user['id']
+        email = user['email']
+        username = user['username']
         msg = '%d %s %s' % (user_id, username, email)
 
         send_simple_email('markschmucker@yahoo.com', 'User Created, interpreted', msg)
