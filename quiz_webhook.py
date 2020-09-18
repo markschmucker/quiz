@@ -62,6 +62,7 @@ class RequestHandler:
         if passed:
             # Unlock them from TL0. Discourse will recognize this soon and will promote them to TL1.
             # See https://meta.discourse.org/t/understanding-discourse-trust-levels/90752/61
+            # Actually it seems to recognize immediately?
             self.client.trust_level_lock(self.user['id'], False)
 
             group_name = 'passed_quiz'
@@ -81,6 +82,14 @@ class RequestHandler:
             for recipient in recipients:
                 send_simple_email(recipient, subject, s)
                 print 'sent email'
+"""
+Thurs pm this almost worked. Unlocked JohnDoe and it seemed to immediately promote him
+to TL1, so that's a bonus if they don't have to wait a day. However it couldn't add him
+to eh paassed_quiz group. I did get an email. ok the group name was wrong. fixed.
+need to fix the quiz (dunderhead pic is wrong). And send a
+notification from here? No- there's not a way in client and not worth it.
+So the dunderhead pic is the only thing.
+"""
 
 
 @app.route('/quiz_complete', methods=['POST'])
@@ -100,10 +109,6 @@ def user_event_handler():
     # Currently we're only interested in user_created. Other webhooks are available,
     # for users, topics, and posts. (However not for user_added_to_group). See
     # https://meta.discourse.org/t/setting-up-webhooks/49045.
-
-
-    #friday: headers is not callable. and I got that error when john doe finished the quiz-
-    #that should have gone to quiz_complete_handler.
 
     headers = request.headers
     pprint(headers)
@@ -131,6 +136,8 @@ def user_event_handler():
         # Once I see an example and can get the user id, need to do this:
         # self.client.trust_level_lock(self.user['id'], True)
         return '', 200
+    else:
+        return '', 400
 
 
 if __name__ == "__main__":
