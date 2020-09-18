@@ -123,7 +123,7 @@ def user_event_handler():
         # need to convert to html, not this
         # report_str = pformat(data)
 
-        send_simple_email('markschmucker@yahoo.com', 'User Created')
+        send_simple_email('markschmucker@yahoo.com', 'User Created', 'no text yet...')
 
         d = json.loads(request.json)
         user_id = d['id']
